@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+	<link type="text/css" href="bootstrap.min.css" rel="stylesheet"/>
+	<style type="text/css">
+		.video {
+			margin: 10px;
+		}
+	</style>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+	<script type="text/javascript">
+		var ITEMS_PER_PAGE = 3;
+		var youtube_api_url = "https://gdata.youtube.com/feeds/api/videos?alt=jsonc&orderby=published&author=mensajedealas&v=2";
+		function getVideos() {
+			var start_index = (cur_page * ITEMS_PER_PAGE) + 1;
+			var query_url = youtube_api_url + "&max-results=" + ITEMS_PER_PAGE + "&start-index=" + start_index;
+			$.ajax({
+				url:query_url,
+				dataType: 'jsonp',
+				success: function(data) {
+					processData(data);
+				},
+				error: function() {
+					alert("error");
+				}
+			});
+		}
+		
+		function processData(data) {
+			$('#videos').html('');
+			for (idx=0; idx<data.data.items.length; idx++) {
+				$('#videos').append('<div class="row"><div class="span12"><div class="well">' +
+					'<h5>' + data.data.items[idx].title + '</h5>' +
+					'<div id="video_' + idx +'"></div>' +
+					'<p>' + data.data.items[idx].description + '</p>' +
+					'</div></div></div>');
+				var params = { allowScriptAccess: "always" };
+			    var atts = { id: "myytplayer" + idx };
+				swfobject.embedSWF(data.data.items[idx].content["5"] + "&enablejsapi=1&playerapiid=ytplayer&version=3", "video_" + idx, "480", "292", "8", null, null, params, atts);				
+			}
+		}
+		
+		function previousPage() {
+			if (cur_page > 0) {
+				cur_page -= 1;
+				getVideos();
+			}
+			if (cur_page == 0) {
+				$('.previous').addClass('disabled');
+			}
+		}
+
+		function nextPage() {
+			cur_page += 1;
+			getVideos();
+			if (cur_page > 0) {
+				$('.previous').removeClass('disabled');
+			}
+		}
+		
+		$(document).ready(function() {
+			getVideos();
+		})
+		
+		var cur_page = 0;
+	</script>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="span12">
+				<div class="well">
+					<div style="float:left"><a class="btn disabled primary previous" href="javascript:previousPage();">&larr; Anterior</a></div>
+					<div style="float:right"><a class="btn primary next" href="javascript:nextPage();">Siguiente &rarr;</a></div>
+				</div>
+			</div>
+		</div>
+		<div id="videos"></div>
+		<div class="row">
+			<div class="span12">
+				<div class="well">
+					<div style="float:left"><a class="btn disabled primary previous" href="javascript:previousPage();">&larr; Anterior</a></div>
+					<div style="float:right"><a class="btn primary next" href="javascript:nextPage();">Siguiente &rarr;</a></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
